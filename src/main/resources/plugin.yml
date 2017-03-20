@@ -3,3 +3,10 @@ version: ${project.version}
 main: net.lapismc.lastonline.LastOnline
 authors: [Dart2112]
 description: Shows a list of the last players online with times
+commands:
+  lastonline:
+    description: "Shows the last players to be online"
+permissions:
+  lastonline.use:
+    description: "Allows players to see the last players to be online"
+    default: false

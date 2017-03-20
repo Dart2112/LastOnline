@@ -1,0 +1,8 @@
+#Don't edit this value unless you want to reset the config
+ConfigVersion: 1
+#Maximum number of users stored, use -1 for no limit
+MaxUsers: -1
+#Maximum number of users to report on in /lastonline
+MaxUsersReporting: 10
+#do you want to show online players in the list as well? this will show how long they have been online instead
+CountOnlinePlayers: false

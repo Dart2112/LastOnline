@@ -1,0 +1,5 @@
+ReportingFormat: "the last %NUMBER users to be on the server are: \n%LIST"
+ListFormat: "%NUMBER: %NAME has been %STATUS since %TIME \n"
+Erorr:
+  NoSuchUser: "There is no user %NAME in the last %NUMBER users online!"
+  NoUsers: "There are currently no users stored in the list!"
