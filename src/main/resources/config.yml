@@ -1,5 +1,7 @@
 #Don't edit this value unless you want to reset the config
 ConfigVersion: 1
+#SHould the plugin automatically download and install new versions, if no then it will just notify you in console
+AutoUpdate: true
 #Maximum number of users stored, use -1 for no limit
 MaxUsers: -1
 #Maximum number of users to report on in /lastonline

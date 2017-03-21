@@ -1,3 +1,19 @@
+/*
+ * Copyright 2017 Benjamin Martin
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.lapismc.lastonline;
 
 import org.bukkit.Bukkit;
@@ -24,6 +40,7 @@ import java.util.logging.Logger;
 public final class LastOnline extends JavaPlugin implements Listener {
 
     public PrettyTime pt = new PrettyTime(Locale.ENGLISH);
+    public LapisUpdater updater;
     public File usersFile = new File(getDataFolder(), "users.yml");
     public File messagesFile = new File(getDataFolder(), "messages.yml");
     public YamlConfiguration users;
@@ -34,6 +51,8 @@ public final class LastOnline extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         configs();
+        Metrics metrics = new Metrics(this);
+        updater = new LapisUpdater(this, "LastOnline", "Dart2112", "LastOnline", "master");
         pt.removeUnit(JustNow.class);
         pt.removeUnit(Millisecond.class);
         Bukkit.getPluginManager().registerEvents(this, this);
@@ -64,6 +83,18 @@ public final class LastOnline extends JavaPlugin implements Listener {
             saveResource("messages.yml", true);
         }
         messages = YamlConfiguration.loadConfiguration(messagesFile);
+    }
+
+    public void update() {
+        if (updater.checkUpdate("LastOnline")) {
+            if (getConfig().getBoolean("AutoUpdate")) {
+                updater.downloadUpdate("LastOnline");
+            } else {
+                logger.info("There is an update for LastOnline, go to spigot to download it!");
+            }
+        } else {
+            logger.info("You are using the latest version of LastOnline");
+        }
     }
 
     public HashMap<UUID, Long> loadUserMap() {
