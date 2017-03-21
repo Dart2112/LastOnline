@@ -36,6 +36,7 @@ public final class LastOnline extends JavaPlugin implements Listener {
         configs();
         pt.removeUnit(JustNow.class);
         pt.removeUnit(Millisecond.class);
+        Bukkit.getPluginManager().registerEvents(this, this);
         logger.info("LastOnline v." + getDescription().getVersion() + " has been enabled!");
     }
 
@@ -108,9 +109,11 @@ public final class LastOnline extends JavaPlugin implements Listener {
 
     public void enterData(Player p) {
         loadUserMap();
-        Date date = new Date();
-        userMap.remove(p.getUniqueId());
-        userMap.put(p.getUniqueId(), date.getTime());
+        if ((userMap.size() < getConfig().getInt("MaxUsers") || getConfig().getInt("MaxUsers") == -1) || userMap.containsKey(p.getUniqueId())) {
+            Date date = new Date();
+            userMap.remove(p.getUniqueId());
+            userMap.put(p.getUniqueId(), date.getTime());
+        }
         saveUserMap();
     }
 
@@ -155,7 +158,7 @@ public final class LastOnline extends JavaPlugin implements Listener {
                     String line = format.replace("%NAME", playerName).replace("%TIME", dateFormat).replace("%NUMBER", i.toString())
                             .replace("%STATUS", op.isOnline() ? "online" : "offline");
                     sb.append(line);
-                    lastOnline.remove(entry.getValue());
+                    lastOnline.remove(entry.getKey());
                     i++;
                 }
                 String message = messages.getString("ReportingFormat").replace("%NUMBER", i - 1 + "").replace("%LIST", sb.toString());
