@@ -28,6 +28,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.ocpsoft.prettytime.Duration;
 import org.ocpsoft.prettytime.PrettyTime;
 import org.ocpsoft.prettytime.units.JustNow;
 import org.ocpsoft.prettytime.units.Millisecond;
@@ -39,20 +40,21 @@ import java.util.logging.Logger;
 
 public final class LastOnline extends JavaPlugin implements Listener {
 
-    public PrettyTime pt = new PrettyTime(Locale.ENGLISH);
-    public LapisUpdater updater;
-    public File usersFile = new File(getDataFolder(), "users.yml");
-    public File messagesFile = new File(getDataFolder(), "messages.yml");
-    public YamlConfiguration users;
-    public YamlConfiguration messages;
-    public HashMap<UUID, Long> userMap = new HashMap<>();
-    public Logger logger = Bukkit.getLogger();
+    private PrettyTime pt = new PrettyTime(Locale.ENGLISH);
+    private LapisUpdater updater;
+    private File usersFile = new File(getDataFolder(), "users.yml");
+    private File messagesFile = new File(getDataFolder(), "messages.yml");
+    private YamlConfiguration users;
+    private YamlConfiguration messages;
+    private HashMap<UUID, Long> userMap = new HashMap<>();
+    private Logger logger = Bukkit.getLogger();
 
     @Override
     public void onEnable() {
         configs();
-        Metrics metrics = new Metrics(this);
+        new Metrics(this);
         updater = new LapisUpdater(this, "LastOnline", "Dart2112", "LastOnline", "master");
+        update();
         pt.removeUnit(JustNow.class);
         pt.removeUnit(Millisecond.class);
         Bukkit.getPluginManager().registerEvents(this, this);
@@ -65,11 +67,13 @@ public final class LastOnline extends JavaPlugin implements Listener {
         logger.info("LastOnline has been disabled!");
     }
 
-    public void configs() {
+    private void configs() {
         saveDefaultConfig();
         if (!usersFile.exists()) {
             try {
-                usersFile.createNewFile();
+                if (!usersFile.createNewFile()) {
+                    logger.info("Failed to create users.yml file!");
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -85,7 +89,7 @@ public final class LastOnline extends JavaPlugin implements Listener {
         messages = YamlConfiguration.loadConfiguration(messagesFile);
     }
 
-    public void update() {
+    private void update() {
         if (updater.checkUpdate("LastOnline")) {
             if (getConfig().getBoolean("AutoUpdate")) {
                 updater.downloadUpdate("LastOnline");
@@ -97,7 +101,7 @@ public final class LastOnline extends JavaPlugin implements Listener {
         }
     }
 
-    public HashMap<UUID, Long> loadUserMap() {
+    private void loadUserMap() {
         if (userMap == null || userMap.size() == 0) {
             List<String> usersList = users.getStringList("List");
             userMap = new HashMap<>();
@@ -108,10 +112,9 @@ public final class LastOnline extends JavaPlugin implements Listener {
                 userMap.put(uuid, timestamp);
             }
         }
-        return userMap;
     }
 
-    public void saveUserMap() {
+    private void saveUserMap() {
         List<String> userList = new ArrayList<>();
         for (UUID uuid : userMap.keySet()) {
             Long time = userMap.get(uuid);
@@ -138,9 +141,9 @@ public final class LastOnline extends JavaPlugin implements Listener {
         enterData(e.getPlayer());
     }
 
-    public void enterData(Player p) {
+    private void enterData(Player p) {
         loadUserMap();
-        if ((userMap.size() < getConfig().getInt("MaxUsers") || getConfig().getInt("MaxUsers") == -1) || userMap.containsKey(p.getUniqueId())) {
+        if (userMap.containsKey(p.getUniqueId()) || userMap.size() < getConfig().getInt("MaxUsers") || getConfig().getInt("MaxUsers") == -1) {
             Date date = new Date();
             userMap.remove(p.getUniqueId());
             userMap.put(p.getUniqueId(), date.getTime());
@@ -164,7 +167,7 @@ public final class LastOnline extends JavaPlugin implements Listener {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', messages.getString("Error.NoUsers")));
                     return true;
                 }
-                TreeMap<Long, UUID> lastOnline = new TreeMap<>((Comparator<Long>) Comparator.reverseOrder());
+                TreeMap<Long, UUID> lastOnline = new TreeMap<>(Comparator.reverseOrder());
                 Integer reportingLimit = getConfig().getInt("MaxUsersReporting");
                 for (UUID uuid : userMap.keySet()) {
                     if (lastOnline.size() >= reportingLimit) {
@@ -183,7 +186,8 @@ public final class LastOnline extends JavaPlugin implements Listener {
                 Integer i = 1;
                 while (!lastOnline.isEmpty()) {
                     Map.Entry<Long, UUID> entry = lastOnline.firstEntry();
-                    String dateFormat = pt.format(new Date(entry.getKey()));
+                    List<Duration> durationList = pt.calculatePreciseDuration(new Date(entry.getKey()));
+                    String dateFormat = pt.format(durationList);
                     OfflinePlayer op = Bukkit.getOfflinePlayer(entry.getValue());
                     String playerName = op.getName();
                     String line = format.replace("%NAME", playerName).replace("%TIME", dateFormat).replace("%NUMBER", i.toString())
@@ -196,10 +200,11 @@ public final class LastOnline extends JavaPlugin implements Listener {
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
             } else if (args.length == 1) {
                 String name = args[0];
-                OfflinePlayer op = Bukkit.getOfflinePlayer(name);
+                @SuppressWarnings("deprecation") OfflinePlayer op = Bukkit.getOfflinePlayer(name);
                 UUID uuid = op.getUniqueId();
                 if (userMap.containsKey(uuid)) {
-                    String timeFormat = pt.format(new Date(userMap.get(uuid)));
+                    List<Duration> durationList = pt.calculatePreciseDuration(new Date(userMap.get(uuid)));
+                    String timeFormat = pt.format(durationList);
                     String format = messages.getString("SingleReportFormat");
                     String message = format.replace("%NAME", name).replace("%TIME", timeFormat).replace("%STATUS", op.isOnline() ? "online" : "offline");
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
