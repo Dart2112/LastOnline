@@ -90,9 +90,9 @@ public final class LastOnline extends JavaPlugin implements Listener {
     }
 
     private void update() {
-        if (updater.checkUpdate("LastOnline")) {
+        if (updater.checkUpdate()) {
             if (getConfig().getBoolean("AutoUpdate")) {
-                updater.downloadUpdate("LastOnline");
+                updater.downloadUpdate();
             } else {
                 logger.info("There is an update for LastOnline, go to spigot to download it!");
             }
