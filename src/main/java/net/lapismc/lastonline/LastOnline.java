@@ -102,7 +102,6 @@ public final class LastOnline extends JavaPlugin implements Listener {
     }
 
     private void loadUserMap() {
-        if (userMap == null || userMap.size() == 0) {
             List<String> usersList = users.getStringList("List");
             userMap = new HashMap<>();
             for (String s : usersList) {
@@ -111,7 +110,6 @@ public final class LastOnline extends JavaPlugin implements Listener {
                 Long timestamp = Long.parseLong(array[1]);
                 userMap.put(uuid, timestamp);
             }
-        }
     }
 
     private void saveUserMap() {
@@ -120,6 +118,7 @@ public final class LastOnline extends JavaPlugin implements Listener {
             Long time = userMap.get(uuid);
             String userData = uuid.toString() + ":" + time.toString();
             userList.add(userData);
+            userMap.remove(uuid);
         }
         users.set("List", userList);
         try {
