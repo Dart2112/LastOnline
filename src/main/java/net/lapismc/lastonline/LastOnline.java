@@ -52,6 +52,7 @@ public final class LastOnline extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         configs();
+        loadUsers();
         new Metrics(this);
         updater = new LapisUpdater(this, "LastOnline", "Dart2112", "LastOnline", "master");
         update();
@@ -63,8 +64,29 @@ public final class LastOnline extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
-        saveUserMap();
+        saveUsers();
         logger.info("LastOnline has been disabled!");
+    }
+
+    private void loadUsers() {
+        List<String> usersList = users.getStringList("List");
+        for (String s : usersList) {
+            String[] array = s.split(":");
+            userMap.put(UUID.fromString(array[0]), Long.valueOf(array[1]));
+        }
+    }
+
+    private void saveUsers() {
+        List<String> usersList = new ArrayList<>();
+        for (UUID uuid : userMap.keySet()) {
+            usersList.add(uuid.toString() + ":" + userMap.get(uuid).toString());
+        }
+        users.set("List", usersList);
+        try {
+            users.save(usersFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void configs() {
@@ -79,10 +101,6 @@ public final class LastOnline extends JavaPlugin implements Listener {
             }
         }
         users = YamlConfiguration.loadConfiguration(usersFile);
-        if (!users.contains("List")) {
-            List<String> list = new ArrayList<>();
-            users.set("List", list);
-        }
         if (!messagesFile.exists()) {
             saveResource("messages.yml", true);
         }
@@ -101,33 +119,6 @@ public final class LastOnline extends JavaPlugin implements Listener {
         }
     }
 
-    private void loadUserMap() {
-            List<String> usersList = users.getStringList("List");
-            userMap = new HashMap<>();
-            for (String s : usersList) {
-                String[] array = s.split(":");
-                UUID uuid = UUID.fromString(array[0]);
-                Long timestamp = Long.parseLong(array[1]);
-                userMap.put(uuid, timestamp);
-            }
-    }
-
-    private void saveUserMap() {
-        List<String> userList = new ArrayList<>();
-        for (UUID uuid : userMap.keySet()) {
-            Long time = userMap.get(uuid);
-            String userData = uuid.toString() + ":" + time.toString();
-            userList.add(userData);
-            userMap.remove(uuid);
-        }
-        users.set("List", userList);
-        try {
-            users.save(usersFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
         if (getConfig().getBoolean("CountOnlinePlayers")) {
@@ -141,13 +132,22 @@ public final class LastOnline extends JavaPlugin implements Listener {
     }
 
     private void enterData(Player p) {
-        loadUserMap();
-        if (userMap.containsKey(p.getUniqueId()) || userMap.size() < getConfig().getInt("MaxUsers") || getConfig().getInt("MaxUsers") == -1) {
+        if (userMap.containsKey(p.getUniqueId())) {
             Date date = new Date();
             userMap.remove(p.getUniqueId());
             userMap.put(p.getUniqueId(), date.getTime());
+        } else if (userMap.size() < getConfig().getInt("MaxUsers") || getConfig().getInt("MaxUsers") == -1) {
+            UUID oldest = p.getUniqueId();
+            Long smallest = new Date().getTime();
+            for (UUID uuid : userMap.keySet()) {
+                if (userMap.get(uuid) < smallest) {
+                    oldest = uuid;
+                    smallest = userMap.get(uuid);
+                }
+            }
+            userMap.remove(oldest);
+            userMap.put(p.getUniqueId(), new Date().getTime());
         }
-        saveUserMap();
     }
 
     @Override
@@ -160,7 +160,6 @@ public final class LastOnline extends JavaPlugin implements Listener {
                     return true;
                 }
             }
-            loadUserMap();
             if (args.length == 0) {
                 if (userMap.size() == 0) {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', messages.getString("Error.NoUsers")));
@@ -199,7 +198,8 @@ public final class LastOnline extends JavaPlugin implements Listener {
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
             } else if (args.length == 1) {
                 String name = args[0];
-                @SuppressWarnings("deprecation") OfflinePlayer op = Bukkit.getOfflinePlayer(name);
+                @SuppressWarnings("deprecation")
+                OfflinePlayer op = Bukkit.getOfflinePlayer(name);
                 UUID uuid = op.getUniqueId();
                 if (userMap.containsKey(uuid)) {
                     List<Duration> durationList = pt.calculatePreciseDuration(new Date(userMap.get(uuid)));
