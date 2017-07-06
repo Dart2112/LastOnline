@@ -48,6 +48,8 @@ public final class LastOnline extends JavaPlugin implements Listener {
     private YamlConfiguration messages;
     private HashMap<UUID, Long> userMap = new HashMap<>();
     private Logger logger = Bukkit.getLogger();
+    private String PrimaryColor;
+    private String SecondaryColor;
 
     @Override
     public void onEnable() {
@@ -66,6 +68,10 @@ public final class LastOnline extends JavaPlugin implements Listener {
     public void onDisable() {
         saveUsers();
         logger.info("LastOnline has been disabled!");
+    }
+
+    private String colorize(String s) {
+        return ChatColor.translateAlternateColorCodes('&', s.replace("&p", PrimaryColor).replace("&s", SecondaryColor));
     }
 
     private void loadUsers() {
@@ -105,6 +111,8 @@ public final class LastOnline extends JavaPlugin implements Listener {
             saveResource("messages.yml", true);
         }
         messages = YamlConfiguration.loadConfiguration(messagesFile);
+        PrimaryColor = messages.getString("PrimaryChatColor");
+        SecondaryColor = messages.getString("SecondaryChatColor");
     }
 
     private void update() {
@@ -135,7 +143,7 @@ public final class LastOnline extends JavaPlugin implements Listener {
         if (userMap.containsKey(p.getUniqueId()) || (userMap.size() < getConfig().getInt("MaxUsers") || getConfig().getInt("MaxUsers") == -1)) {
             Date date = new Date();
             userMap.put(p.getUniqueId(), date.getTime());
-        }else{
+        } else {
             UUID oldest = p.getUniqueId();
             Long smallest = new Date().getTime();
             for (UUID uuid : userMap.keySet()) {
@@ -145,7 +153,7 @@ public final class LastOnline extends JavaPlugin implements Listener {
                 }
             }
             userMap.remove(oldest);
-            userMap.put(p.getUniqueId(), new Date().getTime());   
+            userMap.put(p.getUniqueId(), new Date().getTime());
         }
     }
 
@@ -161,7 +169,7 @@ public final class LastOnline extends JavaPlugin implements Listener {
             }
             if (args.length == 0) {
                 if (userMap.size() == 0) {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', messages.getString("Error.NoUsers")));
+                    sender.sendMessage(colorize(messages.getString("Error.NoUsers")));
                     return true;
                 }
                 TreeMap<Long, UUID> lastOnline = new TreeMap<>(Comparator.reverseOrder());
@@ -184,7 +192,7 @@ public final class LastOnline extends JavaPlugin implements Listener {
                 while (!lastOnline.isEmpty()) {
                     Map.Entry<Long, UUID> entry = lastOnline.firstEntry();
                     List<Duration> durationList = pt.calculatePreciseDuration(new Date(entry.getKey()));
-                    String dateFormat = pt.format(durationList);
+                    String dateFormat = pt.format(durationList).replace("from now", "ago");
                     OfflinePlayer op = Bukkit.getOfflinePlayer(entry.getValue());
                     String playerName = op.getName();
                     String line = format.replace("%NAME", playerName).replace("%TIME", dateFormat).replace("%NUMBER", i.toString())
@@ -194,7 +202,7 @@ public final class LastOnline extends JavaPlugin implements Listener {
                     i++;
                 }
                 String message = messages.getString("ReportingFormat").replace("%NUMBER", i - 1 + "").replace("%LIST", sb.toString());
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+                sender.sendMessage(colorize(message));
             } else if (args.length == 1) {
                 String name = args[0];
                 @SuppressWarnings("deprecation")
@@ -205,14 +213,14 @@ public final class LastOnline extends JavaPlugin implements Listener {
                     String timeFormat = pt.format(durationList);
                     String format = messages.getString("SingleReportFormat");
                     String message = format.replace("%NAME", name).replace("%TIME", timeFormat).replace("%STATUS", op.isOnline() ? "online" : "offline");
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+                    sender.sendMessage(colorize(message));
                 } else if (userMap.size() > 0) {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', messages.getString("Error.NoSuchUser")));
+                    sender.sendMessage(colorize(messages.getString("Error.NoSuchUser")));
                 } else {
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', messages.getString("Error.NoUsers")));
+                    sender.sendMessage(colorize(messages.getString("Error.NoUsers")));
                 }
             } else {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', messages.getString("Error.Usage")));
+                sender.sendMessage(colorize(messages.getString("Error.Usage")));
             }
         }
         return true;
