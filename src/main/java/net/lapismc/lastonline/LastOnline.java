@@ -132,11 +132,10 @@ public final class LastOnline extends JavaPlugin implements Listener {
     }
 
     private void enterData(Player p) {
-        if (userMap.containsKey(p.getUniqueId())) {
+        if (userMap.containsKey(p.getUniqueId()) || (userMap.size() < getConfig().getInt("MaxUsers") || getConfig().getInt("MaxUsers") == -1)) {
             Date date = new Date();
-            userMap.remove(p.getUniqueId());
             userMap.put(p.getUniqueId(), date.getTime());
-        } else if (userMap.size() < getConfig().getInt("MaxUsers") || getConfig().getInt("MaxUsers") == -1) {
+        }else{
             UUID oldest = p.getUniqueId();
             Long smallest = new Date().getTime();
             for (UUID uuid : userMap.keySet()) {
@@ -146,7 +145,7 @@ public final class LastOnline extends JavaPlugin implements Listener {
                 }
             }
             userMap.remove(oldest);
-            userMap.put(p.getUniqueId(), new Date().getTime());
+            userMap.put(p.getUniqueId(), new Date().getTime());   
         }
     }
 
