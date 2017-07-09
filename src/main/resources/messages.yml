@@ -1,5 +1,5 @@
-PrimaryChatColor: "&6"
-SecondaryChatColor: "&c"
+PrimaryColor: "&6"
+SecondaryColor: "&c"
 ReportingFormat: "&pthe last &s%NUMBER &pusers to be on the server are: \n%LIST"
 ListFormat: "&s%NUMBER&p: &s%NAME &phas been &s%STATUS &psince &s%TIME \n"
 SingleReportFormat: "&pUser &s%NAME &phas been &s%STATUS &psince %TIME"

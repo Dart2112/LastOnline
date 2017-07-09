@@ -48,8 +48,8 @@ public final class LastOnline extends JavaPlugin implements Listener {
     private YamlConfiguration messages;
     private HashMap<UUID, Long> userMap = new HashMap<>();
     private Logger logger = Bukkit.getLogger();
-    private String PrimaryColor;
-    private String SecondaryColor;
+    private String PrimaryColor = "&6";
+    private String SecondaryColor = "&c";
 
     @Override
     public void onEnable() {
@@ -62,6 +62,7 @@ public final class LastOnline extends JavaPlugin implements Listener {
         pt.removeUnit(Millisecond.class);
         Bukkit.getPluginManager().registerEvents(this, this);
         logger.info("LastOnline v." + getDescription().getVersion() + " has been enabled!");
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> saveUsers(), 20 * 60 * 10, 20 * 60 * 10);
     }
 
     @Override
@@ -111,8 +112,8 @@ public final class LastOnline extends JavaPlugin implements Listener {
             saveResource("messages.yml", true);
         }
         messages = YamlConfiguration.loadConfiguration(messagesFile);
-        PrimaryColor = messages.getString("PrimaryChatColor");
-        SecondaryColor = messages.getString("SecondaryChatColor");
+        PrimaryColor = messages.getString("PrimaryColor");
+        SecondaryColor = messages.getString("SecondaryColor");
     }
 
     private void update() {
@@ -191,7 +192,7 @@ public final class LastOnline extends JavaPlugin implements Listener {
                 Integer i = 1;
                 while (!lastOnline.isEmpty()) {
                     Map.Entry<Long, UUID> entry = lastOnline.firstEntry();
-                    List<Duration> durationList = pt.calculatePreciseDuration(new Date(entry.getKey()));
+                    List<Duration> durationList = reduceList(pt.calculatePreciseDuration(new Date(entry.getKey())));
                     String dateFormat = pt.format(durationList).replace("from now", "ago");
                     OfflinePlayer op = Bukkit.getOfflinePlayer(entry.getValue());
                     String playerName = op.getName();
@@ -209,7 +210,7 @@ public final class LastOnline extends JavaPlugin implements Listener {
                 OfflinePlayer op = Bukkit.getOfflinePlayer(name);
                 UUID uuid = op.getUniqueId();
                 if (userMap.containsKey(uuid)) {
-                    List<Duration> durationList = pt.calculatePreciseDuration(new Date(userMap.get(uuid)));
+                    List<Duration> durationList = reduceList(pt.calculatePreciseDuration(new Date(userMap.get(uuid))));
                     String timeFormat = pt.format(durationList);
                     String format = messages.getString("SingleReportFormat");
                     String message = format.replace("%NAME", name).replace("%TIME", timeFormat).replace("%STATUS", op.isOnline() ? "online" : "offline");
@@ -224,5 +225,20 @@ public final class LastOnline extends JavaPlugin implements Listener {
             }
         }
         return true;
+    }
+
+    private List<Duration> reduceList(List<Duration> durationList) {
+        while (durationList.size() > 3) {
+            Duration smallest = null;
+            Iterator<Duration> it = durationList.iterator();
+            while (it.hasNext()) {
+                Duration current = it.next();
+                if (smallest == null || smallest.getUnit().getMillisPerUnit() > current.getUnit().getMillisPerUnit()) {
+                    smallest = current;
+                }
+            }
+            durationList.remove(smallest);
+        }
+        return durationList;
     }
 }
