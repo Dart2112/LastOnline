@@ -228,7 +228,7 @@ public final class LastOnline extends JavaPlugin implements Listener {
     }
 
     private List<Duration> reduceList(List<Duration> durationList) {
-        while (durationList.size() > 3) {
+        while (durationList.size() > getConfig().getInt("MaxTimeUnits")) {
             Duration smallest = null;
             Iterator<Duration> it = durationList.iterator();
             while (it.hasNext()) {
