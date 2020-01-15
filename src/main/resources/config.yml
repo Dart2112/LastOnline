@@ -1,9 +1,12 @@
 #Don't edit this value unless you want to reset the config
-ConfigVersion: 1
+ConfigVersion: 2
 #SHould the plugin automatically download and install new versions, if no then it will just notify you in console
 AutoUpdate: true
 #Maximum number of users stored, use -1 for no limit
 MaxUsers: -1
+#The maximum number of time units to report, the bigger time units will be used
+#eg 1 day 1 hour 3 minuts and 10 seconds will become 1 day and 1 hour with MaxTimeUnits 2
+MaxTimeUnits: 2
 #Maximum number of users to report on in /lastonline
 MaxUsersReporting: 10
 #do you want to show online players in the list as well? this will show how long they have been online instead
