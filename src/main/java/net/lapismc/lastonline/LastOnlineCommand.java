@@ -58,30 +58,22 @@ public class LastOnlineCommand extends LapisCoreCommand {
             TreeMap<Long, UUID> lastOnline = new TreeMap<>(Comparator.reverseOrder());
             int reportingLimit = plugin.getConfig().getInt("MaxUsersReporting");
             for (UUID uuid : plugin.userMap.keySet()) {
-                if (lastOnline.size() >= reportingLimit) {
-                    Long current = plugin.userMap.get(uuid);
-                    Long smallest = lastOnline.lastKey();
-                    if (smallest < current) {
-                        lastOnline.remove(smallest);
-                        lastOnline.put(current, uuid);
-                    }
-                } else {
-                    lastOnline.put(plugin.userMap.get(uuid), uuid);
-                }
+                lastOnline.put(plugin.userMap.get(uuid), uuid);
             }
             StringBuilder sb = new StringBuilder();
             String format = plugin.config.getMessage("ListFormat");
             int i = 1;
-            while (!lastOnline.isEmpty()) {
-                Map.Entry<Long, UUID> entry = lastOnline.firstEntry();
-                List<Duration> durationList = reduceList(pt.calculatePreciseDuration(new Date(entry.getKey())));
+            for (Long time : lastOnline.keySet()) {
+                if (i > reportingLimit)
+                    break;
+                UUID uuid = lastOnline.get(time);
+                List<Duration> durationList = reduceList(pt.calculatePreciseDuration(new Date(time)));
                 String dateFormat = pt.format(durationList).replace("from now", "ago");
-                OfflinePlayer op = Bukkit.getOfflinePlayer(entry.getValue());
+                OfflinePlayer op = Bukkit.getOfflinePlayer(uuid);
                 String playerName = op.getName();
-                String line = format.replace("%NAME", playerName).replace("%TIME", dateFormat).replace("%NUMBER", Integer.toString(i))
+                String line = format.replace("%NAME", playerName).replace("%TIME", dateFormat).replace("%NUMBER", i + "")
                         .replace("%STATUS", op.isOnline() ? "online" : "offline");
                 sb.append(line);
-                lastOnline.remove(entry.getKey());
                 i++;
             }
             String message = plugin.config.getMessage("ReportingFormat").replace("%NUMBER", i - 1 + "").replace("%LIST", sb.toString());

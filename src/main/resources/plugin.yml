@@ -7,4 +7,4 @@ description: Shows a list of the last players online with times
 permissions:
   lastonline.use:
     description: "Allows players to see the last players to be online"
-    default: false
+    default: op
