@@ -3,3 +3,6 @@
 1.0.0:
   - "Now works!"
   - "Added primary and secondary colors"
+1.1.0:
+  - "Updated to use LapisCore"
+  - "Code cleanup"
