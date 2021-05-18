@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Benjamin Martin
+ * Copyright 2021 Benjamin Martin
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package net.lapismc.lastonline;
 
-import net.lapismc.lapiscore.LapisCoreCommand;
+import net.lapismc.lapiscore.commands.LapisCoreCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -31,8 +31,8 @@ import java.util.*;
 
 public class LastOnlineCommand extends LapisCoreCommand {
 
-    private LastOnline plugin;
-    private PrettyTime pt = new PrettyTime(Locale.ENGLISH);
+    private final LastOnline plugin;
+    private final PrettyTime pt = new PrettyTime(Locale.ENGLISH);
 
     protected LastOnlineCommand(LastOnline plugin) {
         super(plugin, "lastonline", "Shows the last players to be online", Arrays.asList("lo"));

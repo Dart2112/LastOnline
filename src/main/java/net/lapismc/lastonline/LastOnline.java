@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Benjamin Martin
+ * Copyright 2021 Benjamin Martin
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import java.util.*;
 public final class LastOnline extends LapisCorePlugin implements Listener {
 
     private LapisUpdater updater;
-    private File usersFile = new File(getDataFolder(), "users.yml");
+    private final File usersFile = new File(getDataFolder(), "users.yml");
     private YamlConfiguration users;
     public HashMap<UUID, Long> userMap = new HashMap<>();
     private int taskNumber;

@@ -1,6 +1,6 @@
 name: LastOnline
 version: ${project.version}
-api-version: "1.15"
+api-version: "1.16"
 main: net.lapismc.lastonline.LastOnline
 authors: [Dart2112]
 description: Shows a list of the last players online with times
