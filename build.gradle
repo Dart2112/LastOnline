@@ -22,7 +22,7 @@ plugins {
 
 group = 'net.lapismc'
 archivesBaseName = "LastOnline"
-version = '1.2.0'
+version = '1.2.1'
 description = 'See who has been online most recently'
 sourceCompatibility = '11'
 targetCompatibility = '11'
@@ -37,9 +37,10 @@ repositories {
 }
 
 dependencies {
-    compile 'net.lapismc:LapisCore:1.8.2'
-    compile 'org.ocpsoft.prettytime:prettytime:5.0.1.Final'
-    compileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
+    implementation 'net.lapismc:LapisCore:1.12.0'
+    implementation 'net.lapismc:LapisUI:1.2.1'
+    implementation 'org.ocpsoft.prettytime:prettytime:5.0.6.Final'
+    compileOnly 'org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT'
 }
 
 processResources {
@@ -53,6 +54,7 @@ shadowJar {
     exclude 'javax/**'
     relocate("org.ocpsoft.prettytime", "net.lapismc.lastonline.prettytime")
     relocate("net.lapismc.lapiscore", "net.lapismc.lastonline.core")
+    relocate("net.lapismc.lapisui", "net.lapismc.lastonline.ui")
 }
 
 task javadocJar(type: Jar) {

@@ -1,11 +1,12 @@
-ConfigVersion: 1
+ConfigVersion: 2
 PrimaryColor: "&6"
 SecondaryColor: "&c"
-ReportingFormat: "&pthe last &s%NUMBER &pusers to be on the server are: \n%LIST"
+ReportingFormat: "&pThe last &s%NUMBER &pusers to be on the server are: \n%LIST"
 ListFormat: "&s%NUMBER&p: &s%NAME &phas been &s%STATUS &psince &s%TIME \n"
 SingleReportFormat: "&pUser &s%NAME &phas been &s%STATUS &psince %TIME"
+GUIReportFormat: "&s%STATUS &psince &s%TIME"
 Error:
   Usage: "&c/lastonline [username]"
-  Permssion : "&cYou don't have permission to use this command"
+  Permission: "&cYou don't have permission to use this command"
   NoSuchUser: "&pThere is no user &s%NAME &pin the last &s%NUMBER &pusers online!"
   NoUsers: "&pThere are currently no users stored in the list!"
